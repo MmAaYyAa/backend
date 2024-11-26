@@ -7,20 +7,52 @@ import {
   getWaterPerDayController,
   getWaterPerMonthController,
 } from '../controllers/water.js';
+import { authMiddleware } from '../middlewares/authMiddleware.js';
 import { ctrlWrapper } from '../utils/ctrlWrapper.js';
+//import { validateBody } from '../middlewares/validateBody.js';
+//import { createWaterSchema, updateWaterSchema } from '../validation/water.js';
+//import { isValidId } from '../middlewares/isValidId.js';
 
-const router = Router();
+const waterRouter = Router();
 
-router.post('/water', ctrlWrapper(createWaterController));
+waterRouter.post(
+  '/water',
+  //validateBody(createWaterSchema),
+  authMiddleware,
+  ctrlWrapper(createWaterController),
+);
 
-router.get('/water/:id', ctrlWrapper(getWaterByIdController));
+waterRouter.get(
+  '/water/:waterId', //isValidId,
+  authMiddleware,
+  ctrlWrapper(getWaterByIdController),
+);
 
-router.patch('/water/:id', ctrlWrapper(updateWaterController));
+waterRouter.patch(
+  '/water/:waterId',
+  //isValidId,
+  authMiddleware,
+  //validateBody(updateWaterSchema),
+  ctrlWrapper(updateWaterController),
+);
 
-router.delete('/water/:id', ctrlWrapper(deleteWaterController));
+waterRouter.delete(
+  '/water/:waterId',
+  authMiddleware,
+  //isValidId,
+  ctrlWrapper(deleteWaterController),
+);
 
-router.get('/water/day/:date', ctrlWrapper(getWaterPerDayController));
+waterRouter.get(
+  '/water/day/:date',
+  authMiddleware,
+  ctrlWrapper(getWaterPerDayController),
+);
 
-router.get('/water/month/:date', ctrlWrapper(getWaterPerMonthController));
+waterRouter.get(
+  '/water/month/:date',
+  authMiddleware,
+  ctrlWrapper(getWaterPerMonthController),
+);
 
-export default router;
+export default waterRouter;

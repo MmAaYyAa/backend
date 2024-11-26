@@ -15,7 +15,7 @@ const waterSchema = new Schema(
       required: true,
     },
 
-    owner: {
+    userId: {
       type: Schema.Types.ObjectId,
       ref: 'users',
     },
