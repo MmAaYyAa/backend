@@ -9,49 +9,47 @@ import {
 } from '../controllers/water.js';
 import { authMiddleware } from '../middlewares/authMiddleware.js';
 import { ctrlWrapper } from '../utils/ctrlWrapper.js';
-//import { validateBody } from '../middlewares/validateBody.js';
-//import { createWaterSchema, updateWaterSchema } from '../validation/water.js';
-//import { isValidId } from '../middlewares/isValidId.js';
+import { validateBody } from '../middlewares/validateBody.js';
+import { createWaterSchema, updateWaterSchema } from '../validation/water.js';
+import { isValidId } from '../middlewares/isValidId.js';
 
 const waterRouter = Router();
+waterRouter.use(authMiddleware);
 
 waterRouter.post(
   '/water',
-  //validateBody(createWaterSchema),
-  authMiddleware,
+  validateBody(createWaterSchema),
   ctrlWrapper(createWaterController),
 );
 
 waterRouter.get(
-  '/water/:waterId', //isValidId,
-  authMiddleware,
+  '/water/:waterId',
+  isValidId,
   ctrlWrapper(getWaterByIdController),
 );
 
 waterRouter.patch(
   '/water/:waterId',
-  //isValidId,
-  authMiddleware,
-  //validateBody(updateWaterSchema),
+  isValidId,
+  validateBody(updateWaterSchema),
   ctrlWrapper(updateWaterController),
 );
 
 waterRouter.delete(
   '/water/:waterId',
-  authMiddleware,
-  //isValidId,
+  isValidId,
   ctrlWrapper(deleteWaterController),
 );
 
 waterRouter.get(
   '/water/day/:date',
-  authMiddleware,
+
   ctrlWrapper(getWaterPerDayController),
 );
 
 waterRouter.get(
   '/water/month/:date',
-  authMiddleware,
+
   ctrlWrapper(getWaterPerMonthController),
 );
 
