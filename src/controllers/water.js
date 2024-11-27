@@ -86,8 +86,8 @@ export const deleteWaterController = async (req, res, next) => {
 // Получение записей о потреблении воды за день
 export const getWaterPerDayController = async (req, res, next) => {
   const userId = req.user; //from authMiddleware
-  const { date } = req.query; //from query parametrs
-
+  const { date } = req.params; //from query parametrs
+  console.log('Received date:', date);
   const { totalWater, allRecords } = await getWaterPerDay(userId, date);
 
   res.status(200).json({
@@ -103,7 +103,7 @@ export const getWaterPerDayController = async (req, res, next) => {
 // Получение записей о потреблении воды за месяц
 export const getWaterPerMonthController = async (req, res, next) => {
   const userId = req.user;
-  const { date } = req.query;
+  const { date } = req.params;
 
   const result = await getWaterPerMonth(userId, date);
 
