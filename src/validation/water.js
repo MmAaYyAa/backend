@@ -1,15 +1,16 @@
 import Joi from 'joi';
 
+
 export const createWaterSchema = Joi.object({
   amount: Joi.number().integer().required().example(50).messages({
     'number.base': 'The amount of water should be a number.',
     'number.integer': 'The amount of water should be a whole number.',
     'any.required': 'The amount of water is mandatory for filling.',
   }),
-  date: Joi.date().iso().required().example('YYYY-MM-DD').messages({
-   'date.base': 'The date must be a valid ISO date.',
-    'any.required': 'The date is required.',
-  }),
+  date: Joi.string().required().example('1720918800000').length(13).messages({
+    'date.base': 'The date must be a string.',
+     'any.required': 'The date is required.',
+   }),
   currentDailyNorm: Joi.number().required().messages({
     'number.base': 'The currentDailyNorm must be a number.',
     'any.required': 'The currentDailyNorm is required.',
@@ -28,10 +29,14 @@ export const updateWaterSchema = Joi.object({
     'number.integer': 'The amount of water should be a whole number.',
 
   }),
-  date: Joi.date().iso().required().example('YYYY-MM-DD').messages({
-    'date.base': 'The date must be a valid ISO date.',
-     'any.required': 'The date is required.',
-   }),
+  date: Joi.string().required().example('1720918800000').length(13).messages({
+    'string.base': 'The date must be a string.',
+  }),
+  //datelikeDate(object)
+  // date: Joi.date().iso().required().example('YYYY-MM-DD').messages({
+  //   'date.base': 'The date must be a valid ISO date.',
+  //    'any.required': 'The date is required.',
+  //  }),
    currentDailyNorm: Joi.number().required().messages({
     'number.base': 'The currentDailyNorm must be a number.',
   }),
