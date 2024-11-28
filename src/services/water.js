@@ -110,31 +110,32 @@ export const deleteWaterById = async (waterId, userId) => {
   return water;
 };
 
+export const getWaterPerDay = async (userId, date) => {
+  // convert the date string to Date object
+  const dateObj = new Date(date);
 
-export const getWaterPerDay = async (userId, timestamp) => {
-  const date = new Date(parseInt(timestamp));
-
-  const startOfDay = new Date(date);
+  // get the start of the day (00:00:00)
+  const startOfDay = new Date(dateObj);
   startOfDay.setUTCHours(0, 0, 0, 0);
 
-
-  const endOfDay = new Date(date);
+  // get the end of the day (23:59:59.999)
+  const endOfDay = new Date(dateObj);
   endOfDay.setUTCHours(23, 59, 59, 999);
 
-   // Convert back to Unix timestamp
-   const startOfDayTimestamp = startOfDay.getTime();
-   const endOfDayTimestamp = endOfDay.getTime();
+  // Логируем start и end для проверки
+  console.log('Start of Day ISO:', startOfDay.toISOString());
+  console.log('End of Day ISO:', endOfDay.toISOString());
 
-  console.log('Start of Day:', startOfDay);
-  console.log('End of Day:', endOfDay);
+  // convert to ISO strings for filtering in  MongoDB
+  const startOfDayISO = startOfDay.toISOString();
+  const endOfDayISO = endOfDay.toISOString();
 
+  // water records for the day
   const waterRecords = await WaterCollection.find({
     userId,
-    date: {
-      $gte: startOfDayTimestamp,
-      $lte: endOfDayTimestamp,
-    },
+    date: { $gte: startOfDayISO, $lte: endOfDayISO },
   }).lean();
+
 
   if (!waterRecords || waterRecords.length === 0) {
     return {
@@ -143,23 +144,73 @@ export const getWaterPerDay = async (userId, timestamp) => {
     };
   }
 
+
   const allRecords = waterRecords.map((record) => ({
     id: record._id,
     amount: record.amount,
     date: record.date,
     currentDailyNorm: record.currentDailyNorm,
-       }));
-
-       const totalAmount = waterRecords.reduce((acc, curr) => acc + (curr.amount || 0), 0);
+  }));
 
 
+  const totalAmount = waterRecords.reduce((acc, curr) => acc + curr.amount, 0);
 
   return {
     allRecords,
     totalAmount,
   };
 };
+// export const getWaterPerDay = async (userId, dateString) => {
+//   // Проверяем, передана ли дата
+//   if (!dateString || typeof dateString !== 'string') {
+//     throw new Error("Invalid date provided. Expected format: YYYY-MM-DD");
+//   }
 
+//   // Преобразуем строку формата YYYY-MM-DD в объект Date
+//   const [year, month, day] = dateString.split('-').map(Number);
+
+//   if (!year || !month || !day) {
+//     throw new Error("Invalid date format. Expected format: YYYY-MM-DD");
+//   }
+
+//   const startOfDay = new Date(Date.UTC(year, month - 1, day, 0, 0, 0));
+//   const endOfDay = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
+
+//   console.log('Start of Day:', startOfDay.toISOString());
+//   console.log('End of Day:', endOfDay.toISOString());
+
+//   // Ищем записи в диапазоне дат
+//   const waterRecords = await WaterCollection.find({
+//     userId,
+//     date: {
+//       $gte: startOfDay.toISOString(),
+//       $lte: endOfDay.toISOString(),
+//     },
+//   }).lean();
+
+//   if (!waterRecords || waterRecords.length === 0) {
+//     return {
+//       allRecords: [],
+//       totalAmount: 0,
+//     };
+//   }
+
+//   // Формируем массив записей
+//   const allRecords = waterRecords.map((record) => ({
+//     id: record._id,
+//     amount: record.amount,
+//     date: record.date,
+//     currentDailyNorm: record.currentDailyNorm,
+//   }));
+
+//   // Подсчитываем общую сумму выпитой воды
+//   const totalAmount = waterRecords.reduce((acc, curr) => acc + (curr.amount || 0), 0);
+
+//   return {
+//     allRecords,
+//     totalAmount,
+//   };
+// };
 // export const getWaterPerDay = async (userId, date) => {
 
 //   const startOfDay = new Date(`${date}T00:00:00.000Z`).toISOString();
