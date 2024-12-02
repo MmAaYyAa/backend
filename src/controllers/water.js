@@ -100,16 +100,25 @@ export const getWaterPerDayController = async (req, res, next) => {
   });
 };
 
-// Получение записей о потреблении воды за месяц
 export const getWaterPerMonthController = async (req, res, next) => {
-  const userId = req.user;
-  const { date } = req.params;
+  const userId = req.user; // Данные пользователя из authMiddleware
+  const { date } = req.params; // ISO-строка даты из параметров запроса
 
-  const result = await getWaterPerMonth(userId, date);
+  try {
+    // Вызов обновленного сервиса
+    const { totalWater, dailyRecords } = await getWaterPerMonth(userId, date);
 
-  res.status(200).json({
-    status: 200,
-    message: 'Successfully retrieved monthly water records!',
-    data: { total: result },
-  });
+    // Формирование успешного ответа
+    res.status(200).json({
+      status: 200,
+      message: "Successfully retrieved monthly water records!",
+      data: {
+        totalWater,
+        dailyRecords,
+      },
+    });
+  } catch (error) {
+    // Ловим ошибки и передаем в обработчик
+    next(error);
+  }
 };

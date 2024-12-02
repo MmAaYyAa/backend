@@ -295,28 +295,50 @@ export const getWaterPerDay = async (userId, date) => {
 //   return { totalWater, allRecords };
 // };
 export const getWaterPerMonth = async (userId, date) => {
-  // Начало месяца
-  const startOfMonth = new Date(`${date}-01T00:00:00.000Z`).toISOString();
+  // Определяем начало и конец месяца
+  const startOfMonth = new Date(date);
+  startOfMonth.setUTCDate(1);
+  startOfMonth.setUTCHours(0, 0, 0, 0);
 
-  // Конец месяца
-  const endOfMonth = new Date(`${date}-01T00:00:00.000Z`);
-  endOfMonth.setUTCMonth(endOfMonth.getUTCMonth() + 1); // Переход на следующий месяц
-  endOfMonth.setUTCDate(0); // Последний день предыдущего месяца
-  endOfMonth.setUTCHours(23, 59, 59, 999); // Конец дня
-  const endOfMonthISO = endOfMonth.toISOString();
+  const endOfMonth = new Date(startOfMonth);
+  endOfMonth.setUTCMonth(endOfMonth.getUTCMonth() + 1);
+  endOfMonth.setUTCHours(23, 59, 59, 999);
 
-  console.log('Start of Month:', startOfMonth);
-  console.log('End of Month:', endOfMonthISO);
-
+  // Получаем все записи за месяц
   const waterRecords = await WaterCollection.find({
     userId,
-    date: { $gte: startOfMonth, $lte: endOfMonthISO },
+    date: { $gte: startOfMonth.toISOString(), $lte: endOfMonth.toISOString() },
+  }).lean();
+
+  if (!waterRecords || waterRecords.length === 0) {
+    return { totalWater: 0, dailyRecords: [] };
+  }
+
+  // Группируем записи по дням
+  const groupedByDay = {};
+  waterRecords.forEach((record) => {
+    const day = record.date.split("T")[0]; // Извлекаем дату без времени
+    if (!groupedByDay[day]) {
+      groupedByDay[day] = 0;
+    }
+    groupedByDay[day] += record.amount;
   });
 
-  const totalWater = waterRecords.reduce((sum, record) => sum + record.amount, 0);
+  // Преобразуем объект в массив
+  const dailyRecords = Object.keys(groupedByDay).map((date) => ({
+    date,
+    totalAmount: groupedByDay[date],
+  }));
 
-  return totalWater;
+  // Считаем общий объем воды за месяц
+  const totalWater = dailyRecords.reduce((sum, record) => sum + record.totalAmount, 0);
+
+  return {
+    totalWater,
+    dailyRecords,
+  };
 };
+
 //get water consumption per month
 //date like Date(object)
 // export const getWaterPerMonth = async (userId, date) => {
